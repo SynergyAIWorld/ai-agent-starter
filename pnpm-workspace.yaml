@@ -1,0 +1,31 @@
+packages:
+  - apps/*
+  - packages/*
+  - tooling/*
+
+catalog:
+  "@tanstack/react-query": ^5.59.15
+  "@trpc/client": ^11.0.0-rc.477
+  "@trpc/react-query": ^11.0.0-rc.477
+  "@trpc/server": ^11.0.0-rc.477
+  eslint: ^9.12.0
+  prettier: ^3.3.3
+  tailwindcss: ^3.4.14
+  typescript: ^5.6.3
+  zod: ^3.23.8
+  "@types/node": ^22.5.4
+  typescript-eslint: ^8.1.0
+  "dotenv-cli": ^7.4.2
+  viem: ^2.21.2
+  wagmi: ^2.12.25
+  next: ^14.2.17
+  siwe: ^2.3.2,
+  "ethers": ^6.13.4,
+  "tsup": ^8.3.5
+
+catalogs:
+  react18:
+    react: 18.3.1
+    react-dom: 18.3.1
+    "@types/react": ^18.3.11
+    "@types/react-dom": ^18.3.1

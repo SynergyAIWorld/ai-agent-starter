@@ -1,0 +1,40 @@
+{
+  "name": "@acme/lib",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "default": "./src/tools/index.ts"
+    },
+    "./onchain": {
+      "types": "./dist/onchain/index.d.ts",
+      "default": "./src/onchain/index.ts"
+    },
+    "./env": "./src/env.ts"
+  },
+  "scripts": {
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@acme/prettier-config",
+  "dependencies": {
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "@types/amqplib": "latest",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "dotenv-cli": "catalog:",
+    "zod": "catalog:"
+  }
+}

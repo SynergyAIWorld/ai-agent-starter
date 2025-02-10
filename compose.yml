@@ -1,0 +1,37 @@
+services:
+  starter:
+    image: agent-starter:v1.1
+    container_name: starter
+    build:
+      context: .
+      dockerfile: apps/starter/Dockerfile
+      platforms:
+        - linux/amd64
+    restart: always
+    environment:
+      - USE_OPENAI_EMBEDDING=true
+      - DATABASE_URL=
+      - JWT_TOKEN_SECRET=
+      - OPENAI_API_KEY=
+      - TWITTER_USERNAME=
+      - TWITTER_PASSWORD=
+      - TWITTER_EMAIL=
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgvector17
+  pgvector17:
+    image: pgvector/pgvector:0.8.0-pg17
+    restart: unless-stopped
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: 5X8YQj@Matr7X
+    ports:
+      - "5432:5432"
+networks:
+  starter_network:
+    driver: bridge
+volumes:
+  db-volume:
+    driver: local

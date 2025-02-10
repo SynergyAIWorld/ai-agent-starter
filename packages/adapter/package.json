@@ -1,0 +1,39 @@
+{
+  "name": "@elizaos/adapter",
+  "version": "1.0.0-alpha",
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "@elizaos/source": "./src/index.ts",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "schema.sql",
+    "seed.sql"
+  ],
+  "scripts": {
+    "build": "tsup --format esm --dts",
+    "dev": "tsup --format esm --dts --watch",
+    "format": "prettier --write . --ignore-path ../../.gitignore"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@types/pg": "8.11.10",
+    "pg": "8.13.1"
+  },
+  "devDependencies": {
+    "tsup": "8.3.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
