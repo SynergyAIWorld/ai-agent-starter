@@ -9,14 +9,10 @@
       "types": "./dist/tools/index.d.ts",
       "default": "./src/tools/index.ts"
     },
-    "./onchain": {
-      "types": "./dist/onchain/index.d.ts",
-      "default": "./src/onchain/index.ts"
-    },
     "./env": "./src/env.ts"
   },
   "scripts": {
-    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "format": "prettier --write . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },

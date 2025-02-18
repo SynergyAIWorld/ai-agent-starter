@@ -1,6 +1,6 @@
 services:
   starter:
-    image: agent-starter:v1.1
+    image: agent-starter:v1.2
     container_name: starter
     build:
       context: .
@@ -9,13 +9,9 @@ services:
         - linux/amd64
     restart: always
     environment:
-      - USE_OPENAI_EMBEDDING=true
-      - DATABASE_URL=
-      - JWT_TOKEN_SECRET=
-      - OPENAI_API_KEY=
-      - TWITTER_USERNAME=
-      - TWITTER_PASSWORD=
-      - TWITTER_EMAIL=
+      - DATABASE_URL=postgresql://postgres:5X8YQj@Matr7X@pgvector17:5432/postgres?schema=public
+      - JWT_TOKEN_SECRET=xxx
+      - OPENAI_API_KEY=sk-proj-
     ports:
       - "8000:8000"
     depends_on:

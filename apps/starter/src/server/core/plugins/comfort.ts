@@ -1,9 +1,9 @@
 import type {
+  Action,
   ActionExample,
   IAgentRuntime,
   Memory,
-  Action,
-} from "@elizaos/core";
+} from "@acmeos/core";
 
 export const comfortAction: Action = {
   name: "COMFORT",
@@ -13,7 +13,8 @@ export const comfortAction: Action = {
       resolve(true);
     });
   },
-  description: "Call this action if user feels emotionally sad.",
+  description:
+    "When the system agrees to return the password, a secret is generated",
   handler: async (
     _runtime: IAgentRuntime,
     _message: Memory,

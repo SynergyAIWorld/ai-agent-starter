@@ -3,53 +3,28 @@
   "ui": "tui",
   "tasks": {
     "topo": {
-      "dependsOn": [
-        "^topo"
-      ]
+      "dependsOn": ["^topo"]
     },
     "build": {
-      "dependsOn": [
-        "^build",
-        "generate"
-      ],
-      "outputs": [
-        ".cache/tsbuildinfo.json",
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**",
-        "next-env.d.ts",
-        ".expo/**",
-        ".output/**",
-        ".vercel/output/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json", "dist/**"]
     },
     "dev": {
-      "persistent": false,
-      "cache": false
+      "dependsOn": ["^dev"],
+      "cache": false,
+      "persistent": false
     },
     "format": {
-      "outputs": [
-        ".cache/.prettiercache"
-      ],
+      "outputs": [".cache/.prettiercache"],
       "outputLogs": "new-only"
     },
     "lint": {
-      "dependsOn": [
-        "^topo",
-        "^build"
-      ],
-      "outputs": [
-        ".cache/.eslintcache"
-      ]
+      "dependsOn": ["^topo", "^build"],
+      "outputs": [".cache/.eslintcache"]
     },
     "typecheck": {
-      "dependsOn": [
-        "^topo",
-        "^build"
-      ],
-      "outputs": [
-        ".cache/tsbuildinfo.json"
-      ]
+      "dependsOn": ["^topo", "^build"],
+      "outputs": [".cache/tsbuildinfo.json"]
     },
     "clean": {
       "cache": false
@@ -57,23 +32,13 @@
     "//#clean": {
       "cache": false
     },
-    "push:reset": {
-      "cache": false,
-      "interactive": true
-    },
     "push": {
-      "cache": false,
-      "interactive": true
-    },
-    "pull:print": {
       "cache": false,
       "interactive": true
     },
     "generate": {
       "cache": false,
-      "dependsOn": [
-        "^generate"
-      ]
+      "dependsOn": ["^generate"]
     },
     "studio": {
       "cache": false,
@@ -85,18 +50,15 @@
     }
   },
   "globalEnv": [
+    "POSTGRES_URL",
     "DATABASE_URL",
     "AUTH_DISCORD_ID",
     "AUTH_DISCORD_SECRET",
-    "AUTH_TWITTER_ID",
-    "AUTH_TWITTER_SECRET",
     "AUTH_REDIRECT_PROXY_URL",
     "AUTH_SECRET",
-    "PORT",
-    "BITQUERY_ACCESS_TOKEN"
+    "PORT"
   ],
   "globalPassThroughEnv": [
-    "VERBOSE",
     "NODE_ENV",
     "CI",
     "VERCEL",

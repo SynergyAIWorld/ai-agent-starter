@@ -6,3 +6,8 @@ export const promptSchema = z.object({
   imageData: z.string().optional(),
   type: z.enum(["image/png"]).optional(),
 });
+export const loginSchema = z.object({
+  address: z.string().min(10),
+  signature: z.string().min(10),
+  message: z.string().min(10),
+});

@@ -1,40 +1,40 @@
-import Koa from "koa";
-import Router from "koa-router";
-import fs from "fs";
-import { fileURLToPath } from "url";
+import * as console from "node:console";
 import path from "node:path";
-import serve from "koa-static";
-import cors from "koa2-cors";
-import { w3Logger } from "@acme/lib/tools";
-import { env } from "~/env";
+import { fileURLToPath } from "url";
 import bodyParser from "@koa/bodyparser";
+import Koa from "koa";
 import jwt from "koa-jwt";
+import serve from "koa-static";
+import ws from "koa-websocket";
+import cors from "koa2-cors";
 import { startAgent } from "src/server/core";
-import type { IAgentRuntime } from "@elizaos/core";
-import { myCharacter } from "~/characters/myCharacter";
+
+import type { IAgentRuntime } from "@acmeos/core";
+import { w3Logger } from "@acme/lib/tools";
+
 import { router as aiAgentRouter } from "~/agent/router";
-import multer from "@koa/multer";
+import { defaultCharacter } from "~/characters/defaultCharacter";
+import { env } from "~/env";
+import { verifyToken } from "~/games/auth";
+import { GameHandler } from "~/games/GameHandlers";
+import { NetPack } from "~/games/NetPack";
+import {
+  base64ToUint8Array,
+  uint8ArrayToBase64,
+} from "~/server/core/base64Message";
 
 export class SrvStart {
   private static instance: SrvStart | null;
-  private app: Koa;
-  private router: Router;
-  private readonly uploadDir: string;
+  private app = ws(new Koa());
   private runtimes: Record<string, IAgentRuntime> = {};
+  private gameHandler: GameHandler;
 
   constructor() {
-    this.app = new Koa();
-    this.router = new Router({ prefix: "/api" });
-
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const dir = path.join(__dirname, "../public");
-    const uploadDir = path.join(__dirname, "../uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    this.uploadDir = uploadDir;
     this.app.use(serve(dir));
+    //cors
     this.app.use(
       cors({
         origin: function () {
@@ -48,11 +48,7 @@ export class SrvStart {
       }),
     );
     this.app.use(bodyParser());
-    // Apply router middleware before JWT
-    this.app.use(this.router.routes()).use(this.router.allowedMethods());
-    this.app.use(aiAgentRouter.routes()).use(aiAgentRouter.allowedMethods());
-
-    // Then add JWT and protected routes
+    // http
     this.app
       .use(async (ctx, next) => {
         try {
@@ -72,8 +68,73 @@ export class SrvStart {
         }
       })
       .use(jwt({ secret: env.JWT_TOKEN_SECRET }));
+    // ws
+    this.initWebSocket();
+    //game
+    this.gameHandler = new GameHandler(
+      path.join(
+        process.cwd(),
+        process.env.NODE_ENV === "production"
+          ? "/apps/starter/dist/proto"
+          : "/public/proto",
+      ),
+    );
+    //router
+    this.app.use(aiAgentRouter.routes()).use(aiAgentRouter.allowedMethods());
+    //start default agent
+    this.startAiAgent();
+  }
 
-    void startAgent(myCharacter)
+  private initWebSocket() {
+    this.app.ws.use(async (ctx, next) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        ctx.websocket.on("open", () => {
+          console.log("###Opening Proto");
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        ctx.websocket.on("close", (code: number, reason: Buffer) => {
+          console.log(
+            "###WebSocket connection closed",
+            code,
+            reason.toString(),
+          );
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        ctx.websocket.on("error", (err: Error) => {
+          console.error("###WebSocket connection error", err);
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        ctx.websocket.on("message", async (message: Buffer) => {
+          try {
+            const token = ctx.url.slice(1);
+            if (!verifyToken(token)) {
+              console.error("Verification failed", token);
+              return;
+            }
+            //Process Request
+            const bufferMessage = base64ToUint8Array(message.toString());
+            const { cmd, buffer } = await NetPack.unpack(bufferMessage.buffer);
+            const result = await this.gameHandler.handle(cmd, buffer);
+            const pack = NetPack.pack(result.cmd, result.buffer);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+            ctx.websocket.send(uint8ArrayToBase64(pack));
+          } catch (error) {
+            console.error("Error processing message:", error);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+            ctx.websocket.send(Date.now());
+          }
+        });
+
+        await next();
+      } catch (error) {
+        w3Logger.error("Error run websocket", error);
+      }
+    });
+  }
+
+  private startAiAgent() {
+    void startAgent(defaultCharacter)
       .then((runtime) => {
         this.runtimes.default = runtime;
       })
@@ -93,27 +154,11 @@ export class SrvStart {
     return this.runtimes.default;
   }
 
-  private initializeProtectedRoutes() {
-    const storage = multer.diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, this.uploadDir);
-      },
-      filename: (req, file, cb) => {
-        cb(null, file.originalname);
-      },
-    });
-    const upload = multer({ storage });
-
-    // Add protected routes here
-    this.router.post("/upload", upload.single("file"), (ctx) => {
-      ctx.body = { status: 200, message: "Upload successful!" };
-    });
-  }
-
   public start(port: number) {
-    this.initializeProtectedRoutes();
     this.app.listen(port, () => {
-      w3Logger.success(`Server running at http://localhost:${port}`);
+      w3Logger.success(
+        `Server running at http://localhost:${port} - Env: ${env.NODE_ENV}`,
+      );
     });
   }
 }

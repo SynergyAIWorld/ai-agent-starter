@@ -1,16 +1,15 @@
-import type { Content, IAgentRuntime, Media, Memory } from "@elizaos/core";
+import path from "node:path";
 import {
   composeContext,
   generateMessageResponse,
   messageCompletionFooter,
   ModelClass,
   stringToUuid,
-} from "@elizaos/core";
-import path from "node:path";
+} from "@acmeos/core";
+
+import type { Content, IAgentRuntime, Media, Memory } from "@acmeos/core";
 
 export const messageHandlerTemplate =
-  // {{goals}}
-  // "# Action Examples" is already included
   `{{actionExamples}}
 (Action examples are for reference only. Do not use the information from them in your response.)
 

@@ -1,4 +1,5 @@
-import type { Plugin } from "@elizaos/core";
+import type { Plugin } from "@acmeos/core";
+
 import { comfortAction } from "~/server/core/plugins/comfort";
 
 export const customPlugin: Plugin = {

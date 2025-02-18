@@ -9,6 +9,7 @@ export default defineConfig({
   clean: true,
   env: { IS_SERVER_BUILD: "true" },
   loader: { ".json": "copy" },
+  publicDir: "./public",
   minify: true,
   sourcemap: true,
 });

@@ -1,19 +1,23 @@
-import type { Character, ICacheManager, IDatabaseAdapter } from "@elizaos/core";
-import PostgresDatabaseAdapter from "@elizaos/adapter";
 import {
   AgentRuntime,
+  bootstrapPlugin,
   CacheManager,
   DbCacheAdapter,
   elizaLogger,
   ModelProviderName,
+  postgresAdapter,
   settings,
   stringToUuid,
-} from "@elizaos/core";
-import { bootstrapPlugin } from "@elizaos/bootstrap";
+} from "@acmeos/core";
 
-import { env } from "~/env";
-import { initializeClients } from "~/server/core/clients";
+import type {
+  Character,
+  ICacheManager,
+  IDatabaseAdapter,
+  IDatabaseCacheAdapter,
+} from "@acmeos/core";
 import { w3Logger } from "@acme/lib/tools";
+
 import customPlugin from "~/server/core/plugins";
 
 export function createAgent(
@@ -37,7 +41,6 @@ export function createAgent(
     plugins: [bootstrapPlugin, customPlugin].filter(Boolean),
     providers: [],
     actions: [],
-    services: [],
     managers: [],
     cacheManager: cache,
   });
@@ -48,21 +51,17 @@ export async function startAgent(character: Character) {
     character.id ??= stringToUuid(character.name);
     character.username ??= character.name;
     const token = getTokenForProvider(character.modelProvider, character) ?? "";
-    const db = new PostgresDatabaseAdapter({
-      connectionString: env.DATABASE_URL,
-    });
+    const db = postgresAdapter as IDatabaseAdapter;
     await db.init();
+    const cacheAdapter = postgresAdapter as IDatabaseCacheAdapter;
     const cache = new CacheManager(
-      new DbCacheAdapter(db, character.id ?? stringToUuid(character.name)),
+      new DbCacheAdapter(
+        cacheAdapter,
+        character.id ?? stringToUuid(character.name),
+      ),
     );
     const runtime = createAgent(character, db, cache, token);
     await runtime.initialize();
-    try {
-      runtime.clients = await initializeClients(character, runtime);
-    } catch (err) {
-      w3Logger.error("InitializeClients Error", err);
-    }
-    // report to console
     elizaLogger.debug(`Started ${character.name} as ${runtime.agentId}`);
     return runtime;
   } catch (error) {
@@ -80,10 +79,6 @@ export function getTokenForProvider(
   character: Character,
 ): string | undefined {
   switch (provider) {
-    case ModelProviderName.LLAMALOCAL:
-    case ModelProviderName.OLLAMA:
-    case ModelProviderName.GAIANET:
-      return;
     case ModelProviderName.OPENAI:
       return (
         character.settings?.secrets?.OPENAI_API_KEY ?? settings.OPENAI_API_KEY

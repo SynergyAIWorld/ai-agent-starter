@@ -12,6 +12,7 @@ This is a monorepo managed with pnpm workspaces, containing the following packag
 ## Quick Start
 
 1. **Setup Environment**
+
    ```bash
    # Install dependencies
    pnpm install
@@ -21,6 +22,7 @@ This is a monorepo managed with pnpm workspaces, containing the following packag
    ```
 
 2. **Database Setup**
+
    ```bash
    # Create migrations directory
    mkdir -p prisma/migrations/0_init
@@ -41,13 +43,12 @@ This is a monorepo managed with pnpm workspaces, containing the following packag
    cd apps/starter
    pnpm dev
    ```
-   
 4. **Docker**
    ```bash
    # Start development server
    docker compose -f compose.yml -p agent-starter up -d
    ```
-   
+
 ## Features
 
 - 🤖 **AI Integration** - Ready-to-use AI agent development framework
@@ -78,12 +79,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ```
 mkdir -p prisma/migrations/0_init
 ```
+
 ```
 prisma migrate diff \
 --from-empty \
 --to-schema-datamodel prisma/schema.prisma \
 --script > prisma/migrations/0_init/migration.sql
 ```
+
 ```
 npx prisma migrate resolve --applied 0_init
 ```
