@@ -1,0 +1,192 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// generator zod {
+//   provider = "zod-prisma"
+//   output   = "../src/schema" // (default) the directory where generated zod schemas will be saved
+//
+//   relationModel         = false // (default) Create and export both plain and related models.
+//   modelCase             = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+//   modelSuffix           = "ZodSchema" // (default) Suffix to apply to your prisma models when naming Zod schemas
+//   useDecimalJs          = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+//   prismaJsonNullability = true // (default) uses prisma's scheme for JSON field nullability
+// }
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  UserProfile UserProfile?
+  Events      Events[]
+
+  @@map("t_auth_user")
+}
+
+model Account {
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+  @@map("t_auth_account")
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("t_auth_session")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("t_auth_verification_token")
+}
+
+//##########################################
+model UserProfile {
+  userId       String   @unique @map("user_id")
+  nickName     String   @map("nick_name")
+  avatar       String?
+  points       Int
+  role         Int      @default(0)
+  referralCode String?  @unique @map("referral_code")
+  memories     Json?    @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  status       Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("t_user_profile")
+}
+
+model Configuration {
+  id    Int    @id @default(autoincrement())
+  key   String
+  value Json
+
+  belong String @default("app")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  status    Int      @default(0)
+
+  @@unique([key, belong])
+  @@map("t_app_configuration")
+}
+
+model Events {
+  id      String  @id @default(cuid())
+  rowKey  String  @unique @map("row_key")
+  level   String  @default("INFO")
+  name    String
+  content Json    @default("{}")
+  target  String
+  userId  String? @map("user_id")
+  agentId String? @map("agent_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  status    Int      @default(0)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent     Agent?   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([name, target, level])
+  @@map("t_app_event")
+}
+
+// Quest
+model Quest {
+  id String @id @default(cuid())
+
+  name      String
+  icon      String?
+  desc      String   @map("describe")
+  startTime DateTime @map("start_time")
+  endTime   DateTime @map("end_time")
+  config    Json     @default("{}")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  status    Int      @default(0)
+
+  parentQuestId String? @map("parent_quest_id")
+
+  QuestResult QuestResult[]
+  parentQuest Quest?        @relation("SubQuests", fields: [parentQuestId], references: [id])
+  subQuests   Quest[]       @relation("SubQuests")
+
+  @@map("t_quest")
+}
+
+model QuestResult {
+  id      String @id @default(cuid())
+  questId String @map("quest_Id")
+  rowKey  String @unique @map("row_key")
+
+  info   Json @default("{}")
+  result Json @default("{}")
+
+  nonce      String?
+  unlockTime DateTime? @map("unlock_time")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  status    Int      @default(0)
+
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  @@map("t_quest_result")
+}
+
+model Agent {
+  id     String @id @default(cuid())
+  name   String @unique
+  config Json   @default("{}")
+
+  status    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Events    Events[]
+
+  @@map("t_agent")
+}

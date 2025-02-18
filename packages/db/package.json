@@ -1,0 +1,49 @@
+{
+  "name": "@acme/db",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./src/schema/index.ts"
+    },
+    "./env": "./src/env.ts"
+  },
+  "scripts": {
+    "format": "prettier --write . --ignore-path ../../.gitignore",
+    "generate": "prisma generate",
+    "lint": "eslint",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:reset": "prisma migrate reset",
+    "prebuild": "npm run generate",
+    "predev": "npm run generate",
+    "pull:print": "prisma db pull --print",
+    "push:reset": "prisma db push --force-reset ",
+    "seed": "tsx src/seed.ts",
+    "studio": "prisma studio",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@acme/prettier-config",
+  "devDependencies": {
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "prisma": "latest",
+    "typescript": "catalog:",
+    "zod-prisma": "latest"
+  },
+  "peerDependencies": {
+    "@prisma/client": "latest",
+    "dotenv-cli": "catalog:",
+    "zod": "catalog:"
+  }
+}

@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package games;
+
+//message CGameMessage {
+//  oneof payload {
+//    CGameStart gameStart = 1;
+//    CMove move = 2;
+//    CDialogue dialogue = 3;
+//    CViewHistory viewHistory = 4;
+//    CHeartBeat heartBeat = 5;
+//  }
+//}
+//
+//
+//message SGameMessage {
+//  oneof payload {
+//    SGameStart gameStart = 1;
+//    SMove move = 2;
+//    SDialogue dialogue = 3;
+//    SViewHistory viewHistory = 4;
+//    SHeartBeat heartBeat = 5;
+//    SError error = 6;
+//  }
+//}
+
+message CGameStart {
+  string playerId = 1;
+}
+
+message SGameStart {
+  string message = 1;
+  string gameState = 2;
+}
+
+message Location{
+  string playerId = 1;
+  int32 newX = 2;
+  int32 newY = 3;
+}
+message CMoved {
+  string playerId = 1;
+  repeated Location locations = 2;
+}
+
+message SMoved {
+  bool synced = 1;
+  string error = 2;
+}
+
+message DialogueContent {
+  int32 id = 1;
+  string role = 2;
+  string content = 3;
+}
+
+message CDialogue {
+  string playerId = 1;
+  string c1Id = 2;
+  string c2Id = 3;
+  string message = 4;
+}
+
+message SDialogue {
+  repeated DialogueContent content = 1;
+  repeated DialogueContent history = 2;
+  string action = 3;
+  CDialogue request = 4;
+}
+
+message CHeartBeat {
+  optional int32 timestamp = 1;
+}
+
+message SHeartBeat {
+  optional int32 timestamp = 1;
+}
+
+message SError {
+  optional int32 code = 1;
+  optional string message = 2;
+}

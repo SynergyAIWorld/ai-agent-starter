@@ -1,0 +1,52 @@
+{
+  "name": "@acme/api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./schema": {
+      "types": "./dist/validators/index.d.ts",
+      "default": "./src/validators/index.ts"
+    },
+    "./chains": {
+      "types": "./dist/chains/index.d.ts",
+      "default": "./src/chains/index.ts"
+    },
+    "./env": "./src/env.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc",
+    "format": "prettier --write . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@acme/prettier-config",
+  "devDependencies": {
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@acme/auth": "workspace:*",
+    "@acme/db": "workspace:*",
+    "@acme/lib": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.11.1",
+    "@trpc/server": "catalog:",
+    "dayjs": "^1.11.11",
+    "needle": "^3.3.1",
+    "siwe": "^2.3.2",
+    "superjson": "2.2.1",
+    "viem": "catalog:",
+    "zod": "catalog:"
+  }
+}
