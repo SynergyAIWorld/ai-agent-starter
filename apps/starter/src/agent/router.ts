@@ -10,15 +10,15 @@ export const router = new Router({ prefix: "/api" });
 /**
  * Text
  */
-router.post("/agent/:agentId/message", async (ctx) => {
+router.post("/agent/:userId/message", async (ctx) => {
   try {
-    const { agentId } = agentSchema.parse(ctx.params);
+    const { userId } = agentSchema.parse(ctx.params);
     const param = promptSchema.parse(ctx.request.body);
     try {
       const response = await aiAgent({
         user: {
-          id: agentId,
-          name: agentId,
+          id: userId,
+          name: userId,
         },
         text: param.content,
         runtime: SrvStart.getInstance().defaultRuntime(),
